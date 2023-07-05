@@ -1,0 +1,9 @@
+#Complied Output
+/build
+/node_modules
+
+
+# env variables
+.env
+
+
