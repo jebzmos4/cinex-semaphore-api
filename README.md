@@ -29,14 +29,10 @@ The `CinemaService` class is responsible for handling the booking of tickets in 
 
 - `createBooking`: This method creates a booking using the provided ticket payload. It checks if seats are available and sets the booking status accordingly. It then calls the `CinemaRepository` class to create the booking in the database.
 
-- `calculateShowtime`: This method calculates the showtime based on the screen name, hall number, price, and movie title provided in the ticket payload.
-## CinemaRepository
+## Semaphore Service
 
-The `cinema.repo.ts`:
-The mongoose module is imported to work with MongoDB.
-The Schema class is imported from mongoose to define the schema for the booked tickets.
-The BookingSchema is defined using the Schema class, specifying the structure of a ticket booking object.
-The BookedTickets model is created using mongoose.model, associating the BookingSchema with the "BookTicket" collection in the database.
+The `sempahore.service.ts`:
+This is the semaphore class implementation with two methods `acquire` and `release`. It allows a resource control mechanism
 
 ## Semaphore and Concurrency Control
 
@@ -49,7 +45,6 @@ The use of a semaphore ensures that the number of simultaneous bookings does not
 The `app.ts`:
 The express module is imported to create an Express application.
 The dotenv module is imported to load environment variables from a .env file in which the variables used can be found in `.env.example`.
-The connectDB function is imported from the `./src/db/connect` module to establish a connection to the MongoDB database.
 The cinemaRouter is imported from the `./src/routes/cinema.routes module`, which contains the API routes for the Cinema Booking System.
 The Express application is created using express().
 The express.json() middleware is used to parse incoming JSON data.
@@ -68,7 +63,6 @@ The `cinema.routes.ts` file using the Express Router. The `/book` route is assoc
 
  Semaphore class or package is a synchronization primitive that allows controlling access to a shared resource by multiple threads or processes. It maintains a count of available resources and provides methods to acquire and release these resources.
 The Semaphore class has the following properties and methods:
-The `async-mutex `uses the semaphore class:
 count: Represents the count of available resources in the semaphore.
 waiting: A queue of functions waiting for resources to become available.
 `Constructor`
@@ -90,7 +84,7 @@ By using semaphores, you can control access to shared resources and manage concu
 It provides a complete implementation of the API routes, database connection, and database schema using Express, Mongoose, and MongoDB. By following the documentation, developers can understand the overall code structure and how different components interact to enable ticket bookings and store them in the database.
 
 ## Courtesy 
-
-@Abigail-cloud
+Morifeoluwa Jebutu
+@jebzmos4
 
 
