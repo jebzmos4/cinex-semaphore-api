@@ -18,7 +18,8 @@ export class CinemaService {
     this.semaphore = new Semaphore(this.MAX_CAPACITY);
   }
 
-  public async bookTickets(ticketPayload: Booking): Promise<{ booking?: TicketBooking; bookingId?: string, isBookedOut?: boolean, isExceedMax?: boolean }> {
+  public async bookTickets(ticketPayload: Booking): Promise<{ booking?: TicketBooking; bookingId?: string, 
+    isBookedOut?: boolean, isExceedMax?: boolean, status: string}> {
     try {
       let isBookedOut = false;
       let isExceedMax = false;
@@ -26,12 +27,12 @@ export class CinemaService {
   
       if (availableSeats <= 0) {
         isBookedOut = true;
-        return { isBookedOut };
+        return { isBookedOut, status: "TICKET_BOOKED_OUT" };
       }
   
       if (ticketPayload.requestedSeats > availableSeats) {
         isExceedMax = true;
-        return { isExceedMax }
+        return { isExceedMax, status: "REQUEST_EXCEED_MAX_TICKET" }
       }
       const bookingId = this.utility.generateBookingId();
 
@@ -39,7 +40,7 @@ export class CinemaService {
       const booking = await this.createBooking(ticketPayload, bookingId, availableSeats);
       this.semaphore.release();
   
-      return { booking, bookingId, isBookedOut };
+      return { booking, bookingId, isBookedOut, status: "SUCCESSFUL" };
     } catch (e) {
       throw e;
     }
