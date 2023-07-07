@@ -8,4 +8,8 @@ cinemaRouter.post('/book', cinemaController.bookTickets.bind(cinemaController));
 
 cinemaRouter.get('/book', cinemaController.getickets.bind(cinemaController))
 
+cinemaRouter.post('/set-seat/:maxSeat', cinemaController.setMaxSeat.bind(cinemaController))
+
+cinemaRouter.get('/clear', cinemaController.clearBookings.bind(cinemaController))
+
 export default cinemaRouter;

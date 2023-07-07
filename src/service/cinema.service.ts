@@ -3,24 +3,26 @@ import Main from '../utility/main';
 import { Booking } from '../screen.type';
 import { BookingStatus, TicketBooking } from '../utility/enums.options';
 import { Semaphore } from './semaphore.service';
+var cache = require('memory-cache');
 
 dotenv.config();
 
 export class CinemaService {
-  private MAX_CAPACITY: number;
+  private MAX_CAPACITY: number = 0;
   private semaphore: Semaphore;
   private utility = new Main();
   private currentBookingCount: number = 0;
   private Bookings: Array<TicketBooking> = [];
 
   constructor() {
-    this.MAX_CAPACITY = parseInt(process.env.MAX_SEAT as string, 10); // Specify the radix value (10) for parseInt()
+    //this.MAX_CAPACITY = parseInt(process.env.MAX_SEAT as string, 10); // Specify the radix value (10) for parseInt()
     this.semaphore = new Semaphore(this.MAX_CAPACITY);
   }
 
   public async bookTickets(ticketPayload: Booking): Promise<{ booking?: TicketBooking; bookingId?: string, 
     isBookedOut?: boolean, isExceedMax?: boolean, status: string}> {
     try {
+      this.MAX_CAPACITY = cache.get('maxSeat') as number;
       let isBookedOut = false;
       let isExceedMax = false;
       const availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
@@ -86,5 +88,19 @@ export class CinemaService {
 
   public async getTickets(): Promise<Array<TicketBooking>> {
     return this.Bookings.slice(); // Using slice() to return a shallow copy of the Bookings array
+  }
+
+  public async setMaxSeat(maxseat: number): Promise<any> {
+    try {
+      cache.put('maxSeat', maxseat);
+      const resp = cache.get('maxSeat')
+      return resp;
+    } catch (error) {
+      throw error
+    }
+  }
+  public clearBookings() {
+    this.Bookings.splice(0, this.Bookings.length)
+    return this.Bookings.length;
   }
 }

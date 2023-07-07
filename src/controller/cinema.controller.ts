@@ -19,14 +19,15 @@ export class CinemaController{
       try {
           const {booking, bookingId, isBookedOut, isExceedMax, status }= await this.cinemaService.bookTickets(TicketBooking);
           const completionTime = this.getTime();
-          if (isExceedMax) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Requested number of seats exceeds available seats' })
-          else if (isBookedOut) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No available seats' })
+          if (isExceedMax) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Requested number of seats exceeds available seats', status, requestTime, completionTime })
+          else if (isBookedOut) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No available seats', status, requestTime, completionTime })
           log.info({booking});
           res.status(StatusCodes.ACCEPTED).json({bookingId, message : 'Tickets booked successfully.', status, requestTime, completionTime})
       } catch (error) {
+        const completionTime = this.getTime();
           log.info(error);
           console.log(error);
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "", message: 'An error occurred while processing the request.' });
+          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "", message: 'An error occurred while processing the request.', status: "FAILED", requestTime, completionTime });
       }  
     }
 
@@ -39,6 +40,30 @@ export class CinemaController{
         log.info(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'An error occurred while processing the request.' });
     }  
+    }
+
+    public async setMaxSeat(req: Request, res: Response): Promise<any> {
+      try {
+        const maxSeat = parseInt(req.params.maxSeat);
+          const setSeat = await this.cinemaService.setMaxSeat(maxSeat);
+          console.log(setSeat);
+          res.status(StatusCodes.ACCEPTED).json({message : 'Seat Set successfully.', setSeat})
+      } catch (error) {
+        log.info(error);
+          console.log(error);
+          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "", message: 'An error occurred while processing the request.', status: "FAILED"});
+      }
+    }
+
+    public async clearBookings(req: Request, res: Response): Promise<any> {
+      try {
+          const bookings = this.cinemaService.clearBookings();
+          res.status(StatusCodes.ACCEPTED).json({message : 'Bookings Cleared', bookings})
+      } catch (error) {
+        log.info(error);
+          console.log(error);
+          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "", message: 'An error occurred while processing the request.', status: "FAILED"});
+      }
     }
 
     private getTime(): string {
