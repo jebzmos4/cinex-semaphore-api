@@ -36,7 +36,9 @@ export class CinemaService {
       }
       const bookingId = this.utility.generateBookingId();
 
-  
+      if (availableSeats == 0 || ticketPayload.requestedSeats > availableSeats) {
+        return { isBookedOut, status: "TICKET_BOOKED_OUT" }
+      }
       const booking = await this.createBooking(ticketPayload, bookingId, availableSeats);
       this.semaphore.release();
   
@@ -59,9 +61,6 @@ export class CinemaService {
   }
 
   private async createBooking(ticketPayload: Booking, bookingId: string, availableSeats: number): Promise<TicketBooking> {
-    if (availableSeats === 0 || ticketPayload.requestedSeats > availableSeats) {
-      throw new Error('No available seats');
-    }
 
     const priceOptions = [10, 13, 14, 20]; // Use an array for price options
     const movieTitleOptions = ['Extraction 2', 'Wedding Party 2']; // Use an array for movie title options
