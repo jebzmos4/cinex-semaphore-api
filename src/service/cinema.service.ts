@@ -22,20 +22,25 @@ export class CinemaService {
   public async bookTickets(ticketPayload: Booking): Promise<{ booking?: TicketBooking; bookingId?: string, 
     isBookedOut?: boolean, isExceedMax?: boolean, status: string, availableSeat: number}> {
     try {
-      this.MAX_CAPACITY = cache.get('maxSeat') as number;
+      this.MAX_CAPACITY = cache.get('maxSeat') == null ? 0 : cache.get('maxSeat') as number;
       let isBookedOut = false;
       let isExceedMax = false;
-      const availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
+      let availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
       console.log("===="+ availableSeats + "available seats" + this.currentBookingCount + "----" + this.MAX_CAPACITY)
   
       if (availableSeats <= 0) {
         isBookedOut = true;
         return { isBookedOut, status: "TICKET_BOOKED_OUT", availableSeat: availableSeats };
       }
+
+      if (ticketPayload.requestedSeats > this.MAX_CAPACITY) {
+        isExceedMax = true;
+        return { isExceedMax, status: "REQUEST_EXCEED_MAX_TICKET", availableSeat: availableSeats }
+      }
   
       if (ticketPayload.requestedSeats > availableSeats) {
         isExceedMax = true;
-        return { isExceedMax, status: "REQUEST_EXCEED_MAX_TICKET", availableSeat: availableSeats }
+        return { isExceedMax, status: "TICKET_BOOKED_OUT", availableSeat: availableSeats }
       }
       const bookingId = this.utility.generateBookingId();
 
@@ -43,7 +48,9 @@ export class CinemaService {
         return { isBookedOut, status: "TICKET_BOOKED_OUT", availableSeat: availableSeats }
       }
       const booking = await this.createBooking(ticketPayload, bookingId, availableSeats);
+
       this.semaphore.release();
+      availableSeats = this.calculateAvailableSeats(this.currentBookingCount)
   
       return { booking, bookingId, isBookedOut, status: "SUCCESSFUL", availableSeat: availableSeats };
     } catch (e) {
@@ -106,7 +113,7 @@ export class CinemaService {
   }
 
   public getAvailableSeats() {
-    const maxSeat = cache.get('maxSeat');
+    const maxSeat = cache.get('maxSeat') == null ? 0 : cache.get('maxSeat') as number;
     const availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
     const currentBookingCount = this.currentBookingCount;
 
