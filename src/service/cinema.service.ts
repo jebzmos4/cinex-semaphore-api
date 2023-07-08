@@ -109,6 +109,7 @@ export class CinemaService {
   }
   public clearBookings() {
     this.Bookings.splice(0, this.Bookings.length)
+    this.currentBookingCount = 0;
     return this.Bookings.length;
   }
 
