@@ -20,37 +20,38 @@ export class CinemaService {
   }
 
   public async bookTickets(ticketPayload: Booking): Promise<{ booking?: TicketBooking; bookingId?: string, 
-    isBookedOut?: boolean, isExceedMax?: boolean, status: string}> {
+    isBookedOut?: boolean, isExceedMax?: boolean, status: string, availableSeat: number}> {
     try {
       this.MAX_CAPACITY = cache.get('maxSeat') as number;
       let isBookedOut = false;
       let isExceedMax = false;
       const availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
+      console.log("===="+ availableSeats + "available seats" + this.currentBookingCount + "----" + this.MAX_CAPACITY)
   
       if (availableSeats <= 0) {
         isBookedOut = true;
-        return { isBookedOut, status: "TICKET_BOOKED_OUT" };
+        return { isBookedOut, status: "TICKET_BOOKED_OUT", availableSeat: availableSeats };
       }
   
       if (ticketPayload.requestedSeats > availableSeats) {
         isExceedMax = true;
-        return { isExceedMax, status: "REQUEST_EXCEED_MAX_TICKET" }
+        return { isExceedMax, status: "REQUEST_EXCEED_MAX_TICKET", availableSeat: availableSeats }
       }
       const bookingId = this.utility.generateBookingId();
 
       if (availableSeats == 0 || ticketPayload.requestedSeats > availableSeats) {
-        return { isBookedOut, status: "TICKET_BOOKED_OUT" }
+        return { isBookedOut, status: "TICKET_BOOKED_OUT", availableSeat: availableSeats }
       }
       const booking = await this.createBooking(ticketPayload, bookingId, availableSeats);
       this.semaphore.release();
   
-      return { booking, bookingId, isBookedOut, status: "SUCCESSFUL" };
+      return { booking, bookingId, isBookedOut, status: "SUCCESSFUL", availableSeat: availableSeats };
     } catch (e) {
       throw e;
     }
   }
 
-  private calculateAvailableSeats(currentBookingCount: number): number {
+  public calculateAvailableSeats(currentBookingCount: number): number {
     let availableSeats: number;
 
     if (currentBookingCount > 0) {
@@ -102,5 +103,13 @@ export class CinemaService {
   public clearBookings() {
     this.Bookings.splice(0, this.Bookings.length)
     return this.Bookings.length;
+  }
+
+  public getAvailableSeats() {
+    const maxSeat = cache.get('maxSeat');
+    const availableSeats = this.calculateAvailableSeats(this.currentBookingCount);
+    const currentBookingCount = this.currentBookingCount;
+
+    return { maxSeat, availableSeats, currentBookingCount };
   }
 }

@@ -17,12 +17,12 @@ export class CinemaController{
        status : req.body.status
     }
       try {
-          const {booking, bookingId, isBookedOut, isExceedMax, status }= await this.cinemaService.bookTickets(TicketBooking);
+          const {booking, bookingId, isBookedOut, isExceedMax, status, availableSeat }= await this.cinemaService.bookTickets(TicketBooking);
           const completionTime = this.getTime();
-          if (isExceedMax) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Requested number of seats exceeds available seats', status, requestTime, completionTime })
-          else if (isBookedOut) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No available seats', status, requestTime, completionTime })
+          if (isExceedMax) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Requested number of seats exceeds available seats', status, requestTime, completionTime, availableSeat })
+          else if (isBookedOut) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No available seats', status, requestTime, completionTime, availableSeat })
           log.info({booking});
-          res.status(StatusCodes.ACCEPTED).json({bookingId, message : 'Tickets booked successfully.', status, requestTime, completionTime})
+          res.status(StatusCodes.ACCEPTED).json({bookingId, message : 'Tickets booked successfully.', status, requestTime, completionTime, availableSeat})
       } catch (error) {
         const completionTime = this.getTime();
           log.info(error);
@@ -80,6 +80,15 @@ export class CinemaController{
       const formattedTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${milliSeconds}`;
       console.log(formattedTime);
       return formattedTime;
+    }
+
+    public async getAvailableSeat(req: Request, res: Response): Promise<any> {
+      try {
+          const { availableSeats, currentBookingCount, maxSeat } = this.cinemaService.getAvailableSeats();
+          res.status(StatusCodes.ACCEPTED).json({message : 'Seats Fetched', availableSeats, currentBookingCount, maxSeat });
+      } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "", message: 'An error occurred while processing the request.', status: "FAILED"});
+      }
     }
 }
 

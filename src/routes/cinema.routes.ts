@@ -12,4 +12,6 @@ cinemaRouter.post('/set-seat/:maxSeat', cinemaController.setMaxSeat.bind(cinemaC
 
 cinemaRouter.get('/clear', cinemaController.clearBookings.bind(cinemaController))
 
+cinemaRouter.get('/getAvailableSeat', cinemaController.getAvailableSeat.bind(cinemaController))
+
 export default cinemaRouter;
